@@ -1,0 +1,1320 @@
+<style>
+.er-diagram { margin: 24px 0; font-family: 'SF Mono','Fira Code',monospace; font-size: 13px; }
+.er-row { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 0; }
+.er-entity { background: #f8fafc; border: 2px solid #64748b; border-radius: 8px; padding: 0; min-width: 150px; text-align: center; overflow: hidden; }
+.er-entity .er-name { background: #64748b; color: #fff; padding: 8px 16px; font-weight: 700; font-size: 14px; }
+.er-entity .er-fields { padding: 10px 14px; line-height: 1.7; color: #334155; }
+.er-assoc { border-style: dashed; border-color: #94a3b8; min-width: 160px; }
+.er-assoc .er-name { background: #94a3b8; }
+.er-assoc2 { margin: 0 60px; }
+.er-arrow { padding: 0 20px; color: #64748b; font-weight: 600; font-size: 14px; white-space: nowrap; }
+.er-arrow-v { padding: 0 20px; color: #64748b; font-weight: 600; font-size: 14px; text-align: center; line-height: 1.5; }
+.er-spacer { min-width: 170px; }
+.er-indep { margin-top: 32px; gap: 20px; }
+.er-indep-box { border-color: #cbd5e1; }
+.er-indep-box .er-name { background: #cbd5e1; color: #475569; }
+@media (max-width: 768px) {
+  .er-row { flex-direction: column; gap: 8px; }
+  .er-arrow { transform: rotate(90deg); padding: 8px 0; }
+  .er-arrow-v { display: none; }
+  .er-spacer { display: none; }
+  .er-assoc2 { margin: 0; }
+  .er-indep { flex-direction: column; }
+}
+</style>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBAC 权限管理系统 - 需求分析说明书</title>
+<style>
+:root { --bg: #f8f9fa; --card: #fff; --text: #2c3e50; --muted: #6b7280; --border: #e5e7eb; --accent: #3b82f6; --code-bg: #f1f5f9; --tag: #eff6ff; --radius: 8px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; font-size: 15px; }
+.container { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+h1 { font-size: 2em; text-align: center; padding: 60px 0 20px; border-bottom: 2px solid var(--accent); margin-bottom: 40px; }
+h2 { font-size: 1.5em; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); color: var(--accent); }
+h3 { font-size: 1.2em; margin: 32px 0 12px; }
+h4 { font-size: 1.05em; margin: 24px 0 8px; }
+h5, h6 { font-size: 1em; margin: 16px 0 8px; }
+p { margin: 8px 0; }
+strong { color: #1e40af; }
+code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; }
+pre.code-block { background: #1e293b; color: #e2e8f0; padding: 20px 24px; border-radius: var(--radius); overflow-x: auto; font-size: 13px; line-height: 1.6; margin: 16px 0; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+th { background: #f1f5f9; font-weight: 600; text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--border); }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+tr.fake-sep { display: none; }
+hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.version { text-align: center; color: var(--muted); font-size: 14px; margin: -32px 0 44px; }
+@media (max-width: 768px) { .container { padding: 20px 12px 60px; } h1 { font-size: 1.5em; padding-top: 30px; } table { font-size: 12px; } th, td { padding: 6px 8px; } }
+@media print { body { background: #fff; } .container { max-width: 100%; } }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>RBAC 权限管理系统需求分析说明书</h1>
+
+<p><strong>版本</strong>：v1.0</p>
+<p><strong>更新日期</strong>：2026-07-19</p>
+
+<h1>1 引言</h1>
+
+<h2>1.1 编写目的</h2>
+
+<p>本文档用于明确 RBAC 权限管理系统的建设目标、业务需求、功能需求以及非功能需求，为系统设计、开发、测试和验收提供依据。</p>
+
+<p>RBAC 权限管理系统旨在为企业级后台应用提供统一的身份认证、角色管理与权限控制能力，实现"用户 → 角色 → 权限"的标准化授权模型，提高企业应用的安全性和可维护性。</p>
+
+<h2>1.2 系统背景</h2>
+
+<p>随着企业信息化系统不断增加，各业务系统通常需要独立管理用户权限，面临以下问题：</p>
+
+<p>- 权限管理分散——每个系统各自维护用户和权限，重复建设</p>
+<p>- 授权不灵活——直接在代码中硬编码权限判断（<code>if user == 'admin'</code>），新增角色需要修改代码</p>
+<p>- 缺乏审计追溯——不知道谁在什么时间做了什么操作</p>
+<p>- 权限粒度粗糙——只有"能看"和"不能看"，无法精确到按钮级别</p>
+<p>- 角色关系混乱——角色之间没有继承关系，无法复用权限配置</p>
+
+<p>因此，需要建设一套统一的 RBAC（Role-Based Access Control）权限管理系统，提供：</p>
+
+<p>- 用户管理（创建、编辑、启禁用、删除）</p>
+<p>- 角色管理（创建、编辑、删除、复制、继承）</p>
+<p>- 权限资源管理（菜单 + 按钮级别，树形结构）</p>
+<p>- 菜单动态渲染（有权限才显示对应菜单项）</p>
+<p>- 审计日志（记录所有操作行为）</p>
+
+<h2>1.3 术语定义</h2>
+
+<table>
+<tr><th>术语</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>用户（User）</td><td>系统的登录账号，一个用户可拥有多个角色</td></tr>
+<tr><td>角色（Role）</td><td>权限的集合，如"编辑者"、"只读用户"。角色可继承父角色</td></tr>
+<tr><td>权限（Permission）</td><td>操作的最小粒度。类型：MENU（菜单）或 BUTTON（按钮）</td></tr>
+<tr><td>权限编码（Permission Code）</td><td>全局唯一的权限标识，如 <code>user:list</code>、<code>role:delete</code></td></tr>
+<tr><td>deny 优先</td><td>任一角色标记某权限为"拒绝"，则该权限最终被拒绝</td></tr>
+<tr><td>角色继承</td><td>角色可设置父角色（parent_role_ids），BFS 递归获取祖先权限</td></tr>
+<tr><td>审计日志（Audit Log）</td><td>记录每次增删改操作的用户、时间、IP、结果等信息</td></tr>
+<tr><td>JWT</td><td>JSON Web Token，无状态身份认证令牌，分 access_token 和 refresh_token</td></tr>
+</table>
+
+<h1>2 系统建设目标</h1>
+
+<h2>2.1 统一身份认证</h2>
+
+<p>建立统一的用户认证体系，基于 JWT 双 Token 机制（access_token 30 分钟 + refresh_token 1 天），支持：</p>
+
+<p>- 登录 / 登出 / Token 刷新</p>
+<p>- Token 黑名单（登出后立即使 Token 失效）</p>
+<p>- 登录失败锁定（5 次失败锁定 30 分钟）</p>
+<p>- 图形验证码（登录失败 3 次后要求输入）</p>
+<p>- 强制踢人下线</p>
+
+<h2>2.2 灵活的权限模型</h2>
+
+<p>实现"用户 → 角色 → 权限"三级 RBAC 模型：</p>
+
+<p>- <strong>用户</strong> —— 可分配多个角色，最终权限为所有角色权限的并集</p>
+<p>- <strong>角色</strong> —— 权限的集合，支持父子继承（BFS 递归），支持 deny 优先</p>
+<p>- <strong>权限</strong> —— 最小操作单元，支持 MENU（菜单）和 BUTTON（按钮）两种类型，树形结构无限层级</p>
+
+<h2>2.3 动态菜单与前端权限控制</h2>
+
+<p>- 前端菜单由后端权限数据动态生成，而非写死在代码中</p>
+<p>- 路由守卫根据用户权限控制页面访问（无权限跳 403）</p>
+<p>- 按钮级别控制（v-if 根据权限码决定按钮是否显示）</p>
+<p>- 后端双重校验（所有 API 端点强制验证权限）</p>
+
+<h2>2.4 操作审计</h2>
+
+<p>- 记录所有增删改操作的审计日志</p>
+<p>- 支持按用户、操作类型、模块、时间、结果等条件筛选</p>
+<p>- 支持日志导出（JSON 格式）</p>
+
+<h2>2.5 安全防护</h2>
+
+<p>- 密码 BCrypt 哈希存储</p>
+<p>- 密码强度校验（≥8 位，字母/数字/特殊字符至少两类）</p>
+<p>- 防暴力破解（登录失败锁定 + 验证码）</p>
+<p>- 防用户名枚举（不存在用户和密码错误统一响应）</p>
+<p>- API 速率限制（每 IP 每分钟 200 次）</p>
+<p>- CORS 来源白名单</p>
+<p>- JWT 密钥通过环境变量注入</p>
+<p>- Token 黑名单持久化（Redis TTL 自动过期）</p>
+
+<h1>3 系统用户角色分析</h1>
+
+<h2>3.1 预设角色</h2>
+
+<p>系统通过种子数据预置 4 个角色：</p>
+
+<table>
+<tr><th>角色</th><th>角色编码</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>超级管理员</td><td>SUPER_ADMIN</td><td>拥有全部 23 项权限，可管理用户、角色、权限、审计日志</td></tr>
+<tr><td>管理员</td><td>ADMIN</td><td>可管理用户和角色，不可管理权限资源</td></tr>
+<tr><td>编辑者</td><td>EDITOR</td><td>可查看、创建、编辑用户，<strong>不可删除</strong>用户（user:delete 被拒绝）</td></tr>
+<tr><td>只读用户</td><td>VIEWER</td><td>仅可查看列表，不可做任何修改操作</td></tr>
+</table>
+
+<h2>3.2 角色继承说明</h2>
+
+<p>角色通过 <code>parent_role_ids</code> 字段实现继承。系统启动时递归展开祖先角色，最终权限为所有角色（含祖先）的权限并集。</p>
+
+<p><strong>deny 优先规则：</strong> 若任一角色对某权限标记了 <code>is_deny=True</code>，则该权限最终被拒绝，即使其他角色授予了该权限。</p>
+
+<p>示例：用户同时拥有 SUPER_ADMIN（授予 user:delete）和 EDITOR（拒绝 user:delete），最终 user:delete 被拒绝。</p>
+
+<h2>3.3 预设账号</h2>
+
+<table>
+<tr><th>用户名</th><th>密码</th><th>角色</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>admin</td><td>admin123</td><td>SUPER_ADMIN</td><td>超级管理员，全部权限</td></tr>
+<tr><td>editor</td><td>editor123</td><td>EDITOR</td><td>编辑者，可管理用户但不能删除</td></tr>
+<tr><td>viewer</td><td>viewer123</td><td>VIEWER</td><td>只读用户，仅查看</td></tr>
+<tr><td>multi</td><td>multi123</td><td>EDITOR + VIEWER</td><td>多角色演示</td></tr>
+</table>
+
+<h1>4 系统总体业务流程</h1>
+
+<h2>4.1 用户登录流程</h2>
+
+<pre class="code-block">
+用户输入用户名、密码
+        ↓
+系统检查是否被锁定（Redis/DB 查询失败次数）
+        ↓
+失败次数 ≥ 3？ → 要求输入验证码
+        ↓
+查询用户是否存在
+        ↓
+BCrypt 校验密码
+        ↓
+失败 → 记录登录失败（Redis INCR + EXPIRE），返回&quot;用户名或密码错误&quot;
+        ↓
+成功 → 签发 JWT（access_token 30min + refresh_token 1day）
+        ↓
+返回 Token + 用户信息（id, username, real_name, roles, permissions）
+        ↓
+前端存储 Token 到 localStorage，跳转仪表盘
+</pre>
+
+<h2>4.2 权限校验流程</h2>
+
+<pre class="code-block">
+API 请求到达
+        ↓
+提取 Authorization: Bearer &lt;token&gt;
+        ↓
+解析 JWT → 获取 user_id 和 jti
+        ↓
+Redis 检查 jti 是否在黑名单 → 是 → 401 &quot;token 已被注销&quot;
+        ↓
+DB 查询用户 → 不存在/已删除/已禁用 → 401
+        ↓
+检查路由所需权限码（如 &quot;user:list&quot;）
+        ↓
+从缓存或 DB 获取用户所有权限
+        ↓
+通配符匹配（&quot;*&quot; 或 &quot;user:*&quot; 匹配 &quot;user:list&quot;）
+        ↓
+通过 → 执行请求 | 不通过 → 403 &quot;缺少权限&quot;
+</pre>
+
+<h2>4.3 页面刷新恢复流程</h2>
+
+<pre class="code-block">
+用户刷新页面（F5）
+        ↓
+Vue 组件重新初始化
+        ↓
+从 localStorage 恢复 user（id, username, real_name）和 token
+        ↓
+路由守卫检查：token 存在 → 调 API 获取最新菜单和权限
+        ↓
+成功 → 渲染页面 | 失败 → 清除状态，跳登录
+</pre>
+
+<h2>4.4 菜单动态渲染流程</h2>
+
+<pre class="code-block">
+登录成功 → 调 GET /user/{id}/permissions
+        ↓
+后端查询用户权限 → 构建菜单树
+        ↓
+MENU 类型：保留所有（有权限的和无权限的都返回，用于导航结构）
+BUTTON 类型：只返回用户拥有的
+        ↓
+递归过滤空菜单节点
+        ↓
+前端 SidebarMenu 递归渲染 el-menu → 点击菜单项 → router.push(path)
+        ↓
+路由守卫再次校验权限 → 放行或跳 403
+</pre>
+
+<h1>5 功能需求分析</h1>
+
+<h2>5.1 用户认证管理</h2>
+
+<h3>功能描述</h3>
+
+<p>系统提供基于 JWT 的用户身份认证功能，包括登录、登出、Token 刷新、验证码和强制下线。</p>
+
+<h3>功能要求</h3>
+
+<p>1. <strong>用户登录</strong></p>
+
+<p>    - 输入用户名和密码</p>
+<p>    - 密码使用 BCrypt 验证</p>
+<p>    - 连续失败 5 次锁定 30 分钟（持久化到 Redis/DB）</p>
+<p>    - 失败 3 次后要求输入图形验证码（数学运算 SVG）</p>
+<p>    - 登录成功后签发 JWT（access_token 30 分钟 + refresh_token 1 天）</p>
+<p>    - 返回用户信息（id, username, real_name, roles, permissions）</p>
+
+<p>2. <strong>Token 刷新</strong></p>
+
+<p>    - 使用 refresh_token（在 Header 中传递）换取新的 access_token + refresh_token</p>
+<p>    - 旧的 refresh_token 加入黑名单</p>
+
+<p>3. <strong>用户登出</strong></p>
+
+<p>    - access_token 加入黑名单，使其立即失效</p>
+
+<p>4. <strong>强制下线（管理员）</strong></p>
+
+<p>    - 管理员可强制下线指定用户</p>
+<p>    - 使目标用户的权限缓存失效</p>
+
+<p>5. <strong>获取验证码</strong></p>
+
+<p>    - 生成简单数学验证码（如 "3 + 5 = ?"），返回 SVG 图片 Base64</p>
+<p>    - 一次性消费，验证后销毁</p>
+
+<p>6. <strong>权限检查</strong></p>
+
+<p>    - 检查当前用户是否拥有指定权限编码</p>
+
+<h2>5.2 用户管理</h2>
+
+<h3>功能描述</h3>
+
+<p>管理员可以对系统用户进行 CRUD 操作，批量启禁用，重置密码，分配角色。</p>
+
+<h3>功能要求</h3>
+
+<p>1. <strong>用户列表查询</strong></p>
+
+<p>    - 分页查询，支持关键字（用户名/邮箱/真实姓名）和状态筛选</p>
+<p>    - 返回字段：id, username, real_name, email, phone, status, last_login_time, create_time</p>
+
+<p>2. <strong>创建用户</strong></p>
+
+<p>    - 必填：username（4-20 字符）、password（≥8 位）、real_name（1-50 字符）、gender（0 未知/1 男/2 女）</p>
+<p>    - 可选：email、phone、avatar、role_ids</p>
+<p>    - 密码强度校验：须包含字母/数字/特殊字符中至少两类</p>
+<p>    - 用户名唯一性校验</p>
+
+<p>3. <strong>编辑用户</strong></p>
+
+<p>    - 可选更新：real_name、email、phone、status</p>
+
+<p>4. <strong>删除用户</strong></p>
+
+<p>    - 软删除（标记 deleted_at）</p>
+<p>    - 不能删除自己</p>
+
+<p>5. <strong>批量操作</strong></p>
+
+<p>    - 批量启用/禁用</p>
+<p>    - 批量删除</p>
+
+<p>6. <strong>重置密码</strong></p>
+
+<p>    - 管理员可直接重置任意用户的密码（需新密码 ≥8 位，强度校验）</p>
+<p>    - 重置后用户需要重新登录</p>
+
+<p>7. <strong>分配角色</strong></p>
+
+<p>    - 全量覆盖用户角色</p>
+<p>    - 分配后使权限缓存失效</p>
+
+<p>8. <strong>获取用户权限</strong></p>
+
+<p>    - 获取用户的最终权限列表和动态菜单树</p>
+
+<h2>5.3 角色管理</h2>
+
+<h3>功能描述</h3>
+
+<p>管理员可以对角色进行 CRUD 操作，支持角色树、复制、权限管理和用户关联。</p>
+
+<h3>功能要求</h3>
+
+<p>1. <strong>角色列表查询</strong></p>
+
+<p>    - 支持分页列表和角色树两种视图</p>
+<p>    - 列表模式返回用户数（user_count）</p>
+<p>    - 树模式按 parent_role_ids 构建层级结构</p>
+
+<p>2. <strong>创建角色</strong></p>
+
+<p>    - 必填：role_name、role_code（唯一标识）</p>
+<p>    - 可选：description、parent_role_ids（继承）、permissions（权限分配列表）</p>
+<p>    - 循环依赖检测</p>
+
+<p>3. <strong>编辑角色</strong></p>
+
+<p>    - 可选更新：role_name、description、parent_role_ids、permissions</p>
+<p>    - 权限更新时使所有波及用户的缓存失效</p>
+
+<p>4. <strong>删除角色</strong></p>
+
+<p>    - 有关联用户时拒绝删除</p>
+<p>    - 系统内置角色（is_system=True）不可删除</p>
+
+<p>5. <strong>复制角色</strong></p>
+
+<p>    - 复制角色的描述、父角色 ID 列表和权限分配</p>
+
+<p>6. <strong>角色关联用户查询</strong></p>
+
+<p>    - 查询拥有该角色的所有用户（分页）</p>
+
+<p>7. <strong>移除角色关联用户</strong></p>
+
+<p>    - 批量从角色中移除用户</p>
+
+<h2>5.4 权限资源管理</h2>
+
+<h3>功能描述</h3>
+
+<p>管理系统的权限资源树（菜单 + 按钮），支持 CRUD、排序、导入导出。</p>
+
+<h3>功能要求</h3>
+
+<p>1. <strong>权限树查询</strong></p>
+
+<p>    - 返回完整权限树（嵌套结构），含 id, name, code, type, path, icon, sort, status, api_paths, children</p>
+
+<p>2. <strong>创建权限资源</strong></p>
+
+<p>    - 必填：name、code（全局唯一）、type（MENU/BUTTON）</p>
+<p>    - 可选：parent_id、path、icon、sort、status、api_paths</p>
+<p>    - MENU 类型可设置前端路由路径和图标</p>
+<p>    - BUTTON 类型可设置关联 API 路径列表</p>
+
+<p>3. <strong>编辑权限资源</strong></p>
+
+<p>    - 可选更新：name、parent_id、path、icon、sort、status、api_paths</p>
+<p>    - code 创建后不可修改</p>
+
+<p>4. <strong>删除权限资源</strong></p>
+
+<p>    - 级联处理：子节点的 parent_id 设为 NULL（数据库外键 SET NULL）</p>
+<p>    - 关联的 role_permission 记录自动删除（外键 CASCADE）</p>
+
+<p>5. <strong>排序</strong></p>
+
+<p>    - 提交排序后的权限 ID 列表，按索引更新 sort 值</p>
+
+<p>6. <strong>导出</strong></p>
+
+<p>    - 导出完整权限树（JSON 格式）</p>
+
+<p>7. <strong>导入</strong></p>
+
+<p>    - 接收嵌套权限树 JSON，按 code 匹配：存在则更新，不存在则创建</p>
+<p>    - 递归处理 children</p>
+
+<h2>5.5 审计日志管理</h2>
+
+<h3>功能描述</h3>
+
+<p>记录系统所有增删改操作，支持多条件筛选和导出。</p>
+
+<h3>功能要求</h3>
+
+<p>1. <strong>日志查询</strong></p>
+
+<p>    - 分页查询，支持按用户名、操作类型、模块、结果、时间范围筛选</p>
+<p>    - 返回字段：id, username, operation, module, description, request_params, ip, result, create_time</p>
+
+<p>2. <strong>日志导出</strong></p>
+
+<p>    - 导出筛选结果（最多 1000 条），JSON 格式</p>
+
+<p>3. <strong>自动记录</strong></p>
+
+<p>    - 所有增删改操作自动写入审计日志</p>
+<p>    - 操作类型：LOGIN、CREATE、UPDATE、DELETE、KICK_OUT</p>
+<p>    - 操作模块：AUTH、USER、ROLE、PERMISSION</p>
+<p>    - 记录字段：操作人 ID、操作人用户名、操作类型、模块、描述、请求参数（脱敏）、IP、结果</p>
+
+<h1>6 权限模型详细说明</h1>
+
+<p>本章对系统的核心功能——RBAC 权限模型做详细说明。</p>
+
+<h2>6.1 权限编码体系</h2>
+
+<h3>命名规范</h3>
+
+<p>权限编码采用 <code>模块:操作</code> 格式：</p>
+
+<table>
+<tr><th>权限码</th><th>类型</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>system</td><td>MENU</td><td>系统管理（顶级菜单）</td></tr>
+<tr><td>user:manage</td><td>MENU</td><td>用户管理（菜单入口）</td></tr>
+<tr><td>user:list</td><td>BUTTON</td><td>用户列表查询</td></tr>
+<tr><td>user:create</td><td>BUTTON</td><td>创建用户</td></tr>
+<tr><td>user:update</td><td>BUTTON</td><td>编辑用户</td></tr>
+<tr><td>user:delete</td><td>BUTTON</td><td>删除用户</td></tr>
+<tr><td>user:assign-role</td><td>BUTTON</td><td>分配角色</td></tr>
+<tr><td>user:detail</td><td>BUTTON</td><td>查看用户详情</td></tr>
+<tr><td>user:kick</td><td>BUTTON</td><td>踢人下线</td></tr>
+<tr><td>role:manage</td><td>MENU</td><td>角色管理（菜单入口）</td></tr>
+<tr><td>role:list</td><td>BUTTON</td><td>角色列表</td></tr>
+<tr><td>role:create</td><td>BUTTON</td><td>创建角色</td></tr>
+<tr><td>role:update</td><td>BUTTON</td><td>编辑角色</td></tr>
+<tr><td>role:delete</td><td>BUTTON</td><td>删除角色</td></tr>
+<tr><td>role:detail</td><td>BUTTON</td><td>查看角色详情</td></tr>
+<tr><td>role:assign-user</td><td>BUTTON</td><td>分配用户</td></tr>
+<tr><td>permission:manage</td><td>MENU</td><td>资源管理（菜单入口）</td></tr>
+<tr><td>permission:list</td><td>BUTTON</td><td>资源列表</td></tr>
+<tr><td>permission:create</td><td>BUTTON</td><td>创建资源</td></tr>
+<tr><td>permission:update</td><td>BUTTON</td><td>编辑资源</td></tr>
+<tr><td>permission:delete</td><td>BUTTON</td><td>删除资源</td></tr>
+<tr><td>audit:manage</td><td>MENU</td><td>审计日志（菜单入口）</td></tr>
+<tr><td>audit:list</td><td>BUTTON</td><td>日志列表</td></tr>
+</table>
+
+<h3>通配符匹配</h3>
+
+<p>- <code>*</code> —— 超级管理员，拥有所有权限</p>
+<p>- <code>user:*</code> —— 匹配 user:list、user:create 等所有 user 相关权限</p>
+<p>- <code>user:list</code> —— 精确匹配</p>
+
+<h2>6.2 角色继承</h2>
+
+<h3>继承机制</h3>
+
+<p>角色通过 <code>parent_role_ids</code> 字段声明父角色（JSON 数组，如 <code>[1, 2]</code>）。系统计算用户权限时 BFS 递归展开所有祖先角色。</p>
+
+<h3>循环检测</h3>
+
+<p>创建/更新角色时校验继承关系不会形成循环依赖。</p>
+
+<h2>6.3 deny 优先原则</h2>
+
+<pre class="code-block">
+最终权限 = 所有角色权限的并集
+deny 优先：任一角色标记拒绝 → 最终拒绝
+</pre>
+
+<h3>示例</h3>
+
+<table>
+<tr><th>角色</th><th>user:list</th><th>user:delete</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>SUPER_ADMIN</td><td>✅ 允许</td><td>✅ 允许</td></tr>
+<tr><td>EDITOR</td><td>✅ 允许</td><td>❌ 拒绝</td></tr>
+<tr><td><strong>最终（deny 优先）</strong></td><td>✅ 允许</td><td>❌ 拒绝</td></tr>
+</table>
+
+<h2>6.4 权限缓存</h2>
+
+<p>- 内存缓存 <code>{user_id: set(permission_codes)}</code></p>
+<p>- 角色变更 / 权限变更时自动清除波及用户的缓存</p>
+<p>- 无 TTL 限制（重启清空）</p>
+
+<h1>7 数据库设计</h1>
+
+<h2>7.1 数据库概览</h2>
+
+<p>- 数据库类型：MySQL 8.0</p>
+<p>- 驱动：aiomysql（异步）</p>
+<p>- ORM：SQLAlchemy 2.0（异步 session）</p>
+<p>- 表数量：7 张业务表</p>
+
+<h2>7.2 E-R 关系图</h2>
+
+
+<!-- ===== 在这里替换成了真正的 SVG 矢量图 ===== -->
+<div align="center">
+<svg width="100%" viewBox="0 0 880 420" style="max-width:1000px; font-family: '微软雅黑', Arial, sans-serif; background:#fafafa; border-radius:8px; padding:10px;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+    </filter>
+    <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6">
+      <circle cx="5" cy="5" r="4" fill="#E74C3C" />
+    </marker>
+  </defs>
+
+  <!-- 主链条：user → user_role → role → role_permission → permission -->
+  <g filter="url(#shadow)">
+    <!-- user 表 -->
+    <rect x="20" y="20" width="140" height="140" rx="4" fill="#F4F9FF" stroke="#5B9BD5" stroke-width="1.5"/>
+    <rect x="20" y="20" width="140" height="25" rx="4" fill="#5B9BD5"/>
+    <rect x="20" y="45" width="140" height="0" fill="none"/>
+    <text x="90" y="37" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">user</text>
+    <text x="90" y="62" fill="#333" font-size="12" text-anchor="middle">id (PK)</text>
+    <text x="90" y="82" fill="#333" font-size="12" text-anchor="middle">username</text>
+    <text x="90" y="102" fill="#333" font-size="12" text-anchor="middle">password</text>
+    <text x="90" y="122" fill="#333" font-size="12" text-anchor="middle">...</text>
+
+    <!-- user_role 表 -->
+    <rect x="200" y="45" width="140" height="90" rx="4" fill="#F4F9FF" stroke="#5B9BD5" stroke-width="1.5"/>
+    <rect x="200" y="45" width="140" height="25" rx="4" fill="#5B9BD5"/>
+    <text x="270" y="62" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">user_role</text>
+    <text x="270" y="85" fill="#333" font-size="12" text-anchor="middle">user_id (PK/FK)</text>
+    <text x="270" y="105" fill="#333" font-size="12" text-anchor="middle">role_id (PK/FK)</text>
+
+    <!-- role 表 -->
+    <rect x="380" y="20" width="140" height="140" rx="4" fill="#F4F9FF" stroke="#5B9BD5" stroke-width="1.5"/>
+    <rect x="380" y="20" width="140" height="25" rx="4" fill="#5B9BD5"/>
+    <text x="450" y="37" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">role</text>
+    <text x="450" y="62" fill="#333" font-size="12" text-anchor="middle">id (PK)</text>
+    <text x="450" y="82" fill="#333" font-size="12" text-anchor="middle">role_name</text>
+    <text x="450" y="102" fill="#333" font-size="12" text-anchor="middle">role_code</text>
+    <text x="450" y="122" fill="#333" font-size="12" text-anchor="middle">...</text>
+
+    <!-- role_permission 表 -->
+    <rect x="560" y="45" width="140" height="90" rx="4" fill="#F4F9FF" stroke="#5B9BD5" stroke-width="1.5"/>
+    <rect x="560" y="45" width="140" height="25" rx="4" fill="#5B9BD5"/>
+    <text x="630" y="62" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">role_permission</text>
+    <text x="630" y="85" fill="#333" font-size="12" text-anchor="middle">role_id (PK/FK)</text>
+    <text x="630" y="105" fill="#333" font-size="12" text-anchor="middle">permission_id (PK/FK)</text>
+
+    <!-- permission 表 -->
+    <rect x="740" y="20" width="140" height="140" rx="4" fill="#F4F9FF" stroke="#5B9BD5" stroke-width="1.5"/>
+    <rect x="740" y="20" width="140" height="25" rx="4" fill="#5B9BD5"/>
+    <text x="810" y="37" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">permission</text>
+    <text x="810" y="62" fill="#333" font-size="12" text-anchor="middle">id (PK)</text>
+    <text x="810" y="82" fill="#333" font-size="12" text-anchor="middle">name</text>
+    <text x="810" y="102" fill="#333" font-size="12" text-anchor="middle">code</text>
+    <text x="810" y="122" fill="#333" font-size="12" text-anchor="middle">parent_id (FK → id)</text>
+  </g>
+
+  <!-- 连接线（主链） -->
+  <g stroke="#E74C3C" stroke-width="2">
+    <!-- user 到 user_role -->
+    <line x1="160" y1="90" x2="200" y2="90" />
+    <!-- user_role 到 role -->
+    <line x1="340" y1="90" x2="380" y2="90" />
+    <!-- role 到 role_permission -->
+    <line x1="520" y1="90" x2="560" y2="90" />
+    <!-- role_permission 到 permission -->
+    <line x1="700" y1="90" x2="740" y2="90" />
+  </g>
+  <!-- 红点标记 FK 端 -->
+  <g fill="#E74C3C">
+    <circle cx="160" cy="90" r="4" /><circle cx="200" cy="90" r="4" />
+    <circle cx="340" cy="90" r="4" /><circle cx="380" cy="90" r="4" />
+    <circle cx="520" cy="90" r="4" /><circle cx="560" cy="90" r="4" />
+    <circle cx="700" cy="90" r="4" /><circle cx="740" cy="90" r="4" />
+  </g>
+
+  <!-- 第二行表：logs, token_blacklist, login_failure -->
+  <g filter="url(#shadow)">
+    <!-- logs 表 -->
+    <rect x="20" y="230" width="140" height="140" rx="4" fill="#F4F9FF" stroke="#5B9BD5" stroke-width="1.5"/>
+    <rect x="20" y="230" width="140" height="25" rx="4" fill="#5B9BD5"/>
+    <text x="90" y="247" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">logs</text>
+    <text x="90" y="272" fill="#333" font-size="12" text-anchor="middle">id (PK)</text>
+    <text x="90" y="292" fill="#333" font-size="12" text-anchor="middle">user_id (FK)</text>
+    <text x="90" y="312" fill="#333" font-size="12" text-anchor="middle">username</text>
+    <text x="90" y="332" fill="#333" font-size="12" text-anchor="middle">operation</text>
+
+    <!-- token_blacklist 表 -->
+    <rect x="200" y="230" width="140" height="100" rx="4" fill="#F4F9FF" stroke="#5B9BD5" stroke-width="1.5"/>
+    <rect x="200" y="230" width="140" height="25" rx="4" fill="#5B9BD5"/>
+    <text x="270" y="247" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">token_blacklist</text>
+    <text x="270" y="272" fill="#333" font-size="12" text-anchor="middle">id (PK)</text>
+    <text x="270" y="292" fill="#333" font-size="12" text-anchor="middle">jti (UQ)</text>
+    <text x="270" y="312" fill="#333" font-size="12" text-anchor="middle">expire_time</text>
+
+    <!-- login_failure 表 -->
+    <rect x="380" y="230" width="140" height="100" rx="4" fill="#F4F9FF" stroke="#5B9BD5" stroke-width="1.5"/>
+    <rect x="380" y="230" width="140" height="25" rx="4" fill="#5B9BD5"/>
+    <text x="450" y="247" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">login_failure</text>
+    <text x="450" y="272" fill="#333" font-size="12" text-anchor="middle">id (PK)</text>
+    <text x="450" y="292" fill="#333" font-size="12" text-anchor="middle">username</text>
+    <text x="450" y="312" fill="#333" font-size="12" text-anchor="middle">locked_until</text>
+  </g>
+
+  <!-- logs 到 user 的垂直连线（外键） -->
+  <g stroke="#E74C3C" stroke-width="2">
+    <line x1="90" y1="160" x2="90" y2="230" />
+  </g>
+  <circle cx="90" cy="230" r="4" fill="#E74C3C" />
+
+  <!-- 左下角标注 -->
+  <text x="20" y="395" fill="#555" font-size="12" text-anchor="start">图1：E-R 关系图（红色圆点表示外键连接端）</text>
+</svg>
+</div>
+<!-- ===== SVG 矢量图结束 ===== -->
+
+<p><strong>表间关系说明：</strong></p>
+
+<table>
+<tr><th>关联</th><th>类型</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>user ←→ role</td><td>多对多</td><td>通过 user_role 关联表，一个用户可有多个角色，一个角色可有多个用户</td></tr>
+<tr><td>role ←→ permission</td><td>多对多</td><td>通过 role_permission 关联表，含 is_deny 拒绝标记</td></tr>
+<tr><td>permission → permission</td><td>一对多（自关联）</td><td>parent_id 指向父资源，形成无限层级树</td></tr>
+<tr><td>logs → user</td><td>多对一</td><td>user_id 关联操作人（非外键，用户删除后日志保留）</td></tr>
+<tr><td>token_blacklist</td><td>独立</td><td>存储 JWT 的 jti，与用户无直接关联</td></tr>
+<tr><td>login_failure</td><td>独立</td><td>按 username 记录失败次数，与 user 表无外键关联</td></tr>
+</table>
+
+<h2>7.3 表结构设计</h2>
+
+<h3>7.3.1 user（用户表）</h3>
+
+<table>
+<tr><th>字段</th><th>类型</th><th>允许空</th><th>默认值</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>id</td><td>BIGINT</td><td>否</td><td>AUTO_INCREMENT</td><td>主键</td></tr>
+<tr><td>username</td><td>VARCHAR(50)</td><td>否</td><td>—</td><td>用户名（登录凭证）</td></tr>
+<tr><td>password</td><td>VARCHAR(255)</td><td>否</td><td>—</td><td>BCrypt 哈希密码</td></tr>
+<tr><td>real_name</td><td>VARCHAR(50)</td><td>否</td><td>—</td><td>真实姓名</td></tr>
+<tr><td>gender</td><td>TINYINT</td><td>否</td><td>0</td><td>0=未知，1=男，2=女</td></tr>
+<tr><td>email</td><td>VARCHAR(100)</td><td>是</td><td>NULL</td><td>邮箱</td></tr>
+<tr><td>phone</td><td>VARCHAR(20)</td><td>是</td><td>NULL</td><td>手机号</td></tr>
+<tr><td>avatar</td><td>VARCHAR(255)</td><td>是</td><td>NULL</td><td>头像 URL</td></tr>
+<tr><td>status</td><td>TINYINT(1)</td><td>否</td><td>1</td><td>1=启用，0=禁用</td></tr>
+<tr><td>remark</td><td>VARCHAR(500)</td><td>是</td><td>NULL</td><td>备注</td></tr>
+<tr><td>last_login_time</td><td>DATETIME</td><td>是</td><td>NULL</td><td>最近登录时间</td></tr>
+<tr><td>last_login_ip</td><td>VARCHAR(50)</td><td>是</td><td>NULL</td><td>最近登录 IP</td></tr>
+<tr><td>deleted_at</td><td>DATETIME</td><td>是</td><td>NULL</td><td>软删除时间（NULL=未删除）</td></tr>
+<tr><td>create_time</td><td>DATETIME</td><td>否</td><td>CURRENT_TIMESTAMP</td><td>创建时间</td></tr>
+<tr><td>update_time</td><td>DATETIME</td><td>否</td><td>CURRENT_TIMESTAMP ON UPDATE</td><td>更新时间</td></tr>
+</table>
+
+<p><strong>唯一约束：</strong> <code>(username, deleted_at)</code>、<code>(email, deleted_at)</code>、<code>(phone, deleted_at)</code></p>
+<p><strong>索引：</strong> <code>(status, deleted_at)</code>、<code>(last_login_time)</code></p>
+
+<h3>7.3.2 role（角色表）</h3>
+
+<table>
+<tr><th>字段</th><th>类型</th><th>允许空</th><th>默认值</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>id</td><td>BIGINT</td><td>否</td><td>AUTO_INCREMENT</td><td>主键</td></tr>
+<tr><td>role_name</td><td>VARCHAR(50)</td><td>否</td><td>—</td><td>角色名称</td></tr>
+<tr><td>role_code</td><td>VARCHAR(50)</td><td>否</td><td>—</td><td>角色编码（UNIQUE）</td></tr>
+<tr><td>description</td><td>VARCHAR(255)</td><td>是</td><td>NULL</td><td>描述</td></tr>
+<tr><td>status</td><td>TINYINT(1)</td><td>否</td><td>1</td><td>1=启用，0=禁用</td></tr>
+<tr><td>parent_role_ids</td><td>JSON</td><td>是</td><td>NULL</td><td>父角色 ID 列表（如 [1,2]）</td></tr>
+<tr><td>is_system</td><td>TINYINT(1)</td><td>否</td><td>0</td><td>系统内置标记（1=不可删除）</td></tr>
+<tr><td>sort</td><td>INT</td><td>否</td><td>0</td><td>排序号</td></tr>
+<tr><td>create_time</td><td>DATETIME</td><td>否</td><td>CURRENT_TIMESTAMP</td><td>创建时间</td></tr>
+<tr><td>update_time</td><td>DATETIME</td><td>否</td><td>CURRENT_TIMESTAMP ON UPDATE</td><td>更新时间</td></tr>
+</table>
+
+<p><strong>索引：</strong> <code>(status)</code>、<code>(sort)</code></p>
+
+<h3>7.3.3 permission（权限资源表）</h3>
+
+<table>
+<tr><th>字段</th><th>类型</th><th>允许空</th><th>默认值</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>id</td><td>BIGINT</td><td>否</td><td>AUTO_INCREMENT</td><td>主键</td></tr>
+<tr><td>name</td><td>VARCHAR(50)</td><td>否</td><td>—</td><td>资源名称</td></tr>
+<tr><td>code</td><td>VARCHAR(100)</td><td>否</td><td>—</td><td>权限编码（UNIQUE）</td></tr>
+<tr><td>type</td><td>VARCHAR(10)</td><td>否</td><td>—</td><td>MENU 或 BUTTON</td></tr>
+<tr><td>parent_id</td><td>BIGINT</td><td>是</td><td>NULL</td><td>父资源 ID（FK→permission.id, SET NULL）</td></tr>
+<tr><td>path</td><td>VARCHAR(200)</td><td>是</td><td>NULL</td><td>前端路由路径（菜单专用）</td></tr>
+<tr><td>icon</td><td>VARCHAR(50)</td><td>是</td><td>NULL</td><td>图标标识</td></tr>
+<tr><td>sort</td><td>INT</td><td>否</td><td>0</td><td>排序号</td></tr>
+<tr><td>status</td><td>TINYINT(1)</td><td>否</td><td>1</td><td>1=启用，0=禁用</td></tr>
+<tr><td>api_paths</td><td>JSON</td><td>是</td><td>NULL</td><td>关联 API 路径列表（按钮专用）</td></tr>
+<tr><td>create_time</td><td>DATETIME</td><td>否</td><td>CURRENT_TIMESTAMP</td><td>创建时间</td></tr>
+<tr><td>update_time</td><td>DATETIME</td><td>否</td><td>CURRENT_TIMESTAMP ON UPDATE</td><td>更新时间</td></tr>
+</table>
+
+<p><strong>自关联：</strong> <code>parent_id</code> → <code>id</code>，树形结构</p>
+
+<h3>7.3.4 user_role（用户-角色关联表）</h3>
+
+<table>
+<tr><th>字段</th><th>类型</th><th>允许空</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>user_id</td><td>BIGINT</td><td>否</td><td>用户 ID（FK→user.id, CASCADE）</td></tr>
+<tr><td>role_id</td><td>BIGINT</td><td>否</td><td>角色 ID（FK→role.id, CASCADE）</td></tr>
+</table>
+
+<p><strong>主键：</strong> <code>(user_id, role_id)</code> 复合主键</p>
+
+<h3>7.3.5 role_permission（角色-权限关联表）</h3>
+
+<table>
+<tr><th>字段</th><th>类型</th><th>允许空</th><th>默认值</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>role_id</td><td>BIGINT</td><td>否</td><td>—</td><td>角色 ID（FK→role.id, CASCADE）</td></tr>
+<tr><td>permission_id</td><td>BIGINT</td><td>否</td><td>—</td><td>权限 ID（FK→permission.id, CASCADE）</td></tr>
+<tr><td>is_deny</td><td>TINYINT(1)</td><td>否</td><td>0</td><td>0=授予，1=拒绝（拒绝优先）</td></tr>
+</table>
+
+<p><strong>主键：</strong> <code>(role_id, permission_id)</code> 复合主键</p>
+<p><strong>索引：</strong> <code>(permission_id)</code></p>
+
+<h3>7.3.6 token_blacklist（Token 黑名单表）</h3>
+
+<table>
+<tr><th>字段</th><th>类型</th><th>允许空</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>id</td><td>BIGINT</td><td>否</td><td>主键</td></tr>
+<tr><td>jti</td><td>VARCHAR(255)</td><td>否</td><td>JWT 唯一标识符（UNIQUE）</td></tr>
+<tr><td>expire_time</td><td>DATETIME</td><td>否</td><td>Token 原始过期时间</td></tr>
+<tr><td>create_time</td><td>DATETIME</td><td>否</td><td>加入黑名单时间</td></tr>
+</table>
+
+<h3>7.3.7 login_failure（登录失败记录表）</h3>
+
+<table>
+<tr><th>字段</th><th>类型</th><th>允许空</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>id</td><td>BIGINT</td><td>否</td><td>主键</td></tr>
+<tr><td>username</td><td>VARCHAR(50)</td><td>否</td><td>尝试登录的用户名（INDEX）</td></tr>
+<tr><td>ip</td><td>VARCHAR(50)</td><td>否</td><td>登录来源 IP</td></tr>
+<tr><td>fail_count</td><td>INT</td><td>否</td><td>失败次数</td></tr>
+<tr><td>locked_until</td><td>DATETIME</td><td>是</td><td>锁定截止时间</td></tr>
+<tr><td>create_time</td><td>DATETIME</td><td>否</td><td>首次失败时间</td></tr>
+<tr><td>update_time</td><td>DATETIME</td><td>否</td><td>最近失败时间</td></tr>
+</table>
+
+<h3>7.3.8 logs（审计日志表）</h3>
+
+<table>
+<tr><th>字段</th><th>类型</th><th>允许空</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>id</td><td>BIGINT</td><td>否</td><td>主键</td></tr>
+<tr><td>user_id</td><td>INT</td><td>是</td><td>操作用户 ID</td></tr>
+<tr><td>username</td><td>VARCHAR(50)</td><td>否</td><td>操作人用户名（快照）</td></tr>
+<tr><td>operation</td><td>VARCHAR(20)</td><td>否</td><td>操作类型（LOGIN/CREATE/UPDATE/DELETE）</td></tr>
+<tr><td>module</td><td>VARCHAR(20)</td><td>否</td><td>操作模块（AUTH/USER/ROLE/PERMISSION）</td></tr>
+<tr><td>description</td><td>VARCHAR(500)</td><td>否</td><td>操作描述</td></tr>
+<tr><td>request_params</td><td>TEXT</td><td>是</td><td>请求参数（脱敏 JSON）</td></tr>
+<tr><td>ip</td><td>VARCHAR(50)</td><td>是</td><td>操作 IP</td></tr>
+<tr><td>result</td><td>VARCHAR(10)</td><td>否</td><td>SUCCESS 或 FAIL</td></tr>
+<tr><td>create_time</td><td>DATETIME</td><td>否</td><td>操作时间</td></tr>
+</table>
+
+<h1>8 接口设计</h1>
+
+<h2>8.1 接口规范</h2>
+
+<p>- 协议：HTTP/1.1</p>
+<p>- 格式：JSON</p>
+<p>- 认证：Bearer Token（Header: <code>Authorization: Bearer <jwt></code>）</p>
+<p>- 全局前缀：<code>/api</code></p>
+
+<h3>统一响应格式</h3>
+
+<p><strong>成功：</strong></p>
+<pre class="code-block">
+{&quot;code&quot;: 0, &quot;message&quot;: &quot;success&quot;, &quot;data&quot;: {...}}
+</pre>
+
+<p><strong>失败：</strong></p>
+<pre class="code-block">
+{&quot;code&quot;: 401, &quot;message&quot;: &quot;token 无效或已过期&quot;, &quot;data&quot;: null}
+</pre>
+
+<p><strong>分页：</strong></p>
+<pre class="code-block">
+{&quot;code&quot;: 0, &quot;data&quot;: {&quot;total&quot;: 100, &quot;page&quot;: 1, &quot;size&quot;: 20, &quot;list&quot;: [...]}}
+</pre>
+
+<h3>分页参数</h3>
+
+<p>所有列表接口统一使用查询参数：<code>page</code>（≥1，默认 1）、<code>size</code>（1-100，默认 20）</p>
+
+<h2>8.2 认证鉴权 — `/api/auth`</h2>
+
+<table>
+<tr><th>方法</th><th>路径</th><th>权限</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>GET</td><td><code>/auth/captcha</code></td><td>无</td><td>获取图形验证码</td></tr>
+<tr><td>POST</td><td><code>/auth/login</code></td><td>无</td><td>用户登录</td></tr>
+<tr><td>POST</td><td><code>/auth/refresh</code></td><td>无</td><td>刷新 Token（Header 传 refresh_token）</td></tr>
+<tr><td>POST</td><td><code>/auth/logout</code></td><td>无</td><td>用户登出</td></tr>
+<tr><td>POST</td><td><code>/auth/kick-out</code></td><td>user:kick</td><td>强制下线用户</td></tr>
+<tr><td>POST</td><td><code>/auth/check-permission</code></td><td>无</td><td>检查当前用户权限</td></tr>
+</table>
+
+<h3>POST /auth/login 请求体</h3>
+
+<pre class="code-block">
+{
+  &quot;username&quot;: &quot;admin&quot;,
+  &quot;password&quot;: &quot;admin123&quot;,
+  &quot;captcha_id&quot;: &quot;可选&quot;,
+  &quot;captcha&quot;: &quot;可选&quot;
+}
+</pre>
+
+<h3>POST /auth/login 响应</h3>
+
+<pre class="code-block">
+{
+  &quot;code&quot;: 0,
+  &quot;data&quot;: {
+    &quot;access_token&quot;: &quot;eyJ...&quot;,
+    &quot;refresh_token&quot;: &quot;eyJ...&quot;,
+    &quot;token_type&quot;: &quot;Bearer&quot;,
+    &quot;expires_in&quot;: 1800,
+    &quot;user_info&quot;: {
+      &quot;id&quot;: 1,
+      &quot;username&quot;: &quot;admin&quot;,
+      &quot;real_name&quot;: &quot;系统管理员&quot;,
+      &quot;roles&quot;: [&quot;SUPER_ADMIN&quot;],
+      &quot;permissions&quot;: [&quot;user:list&quot;, &quot;user:create&quot;, ...]
+    }
+  }
+}
+</pre>
+
+<h2>8.3 用户管理 — `/api/user`</h2>
+
+<table>
+<tr><th>方法</th><th>路径</th><th>权限</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>GET</td><td><code>/user/</code></td><td>user:list</td><td>分页查询用户列表</td></tr>
+<tr><td>POST</td><td><code>/user/</code></td><td>user:create</td><td>创建用户</td></tr>
+<tr><td>GET</td><td><code>/user/{id}</code></td><td>user:detail</td><td>用户详情（含角色和权限）</td></tr>
+<tr><td>PUT</td><td><code>/user/{id}</code></td><td>user:update</td><td>编辑用户</td></tr>
+<tr><td>DELETE</td><td><code>/user/{id}</code></td><td>user:delete</td><td>软删除用户</td></tr>
+<tr><td>PUT</td><td><code>/user/batch-status</code></td><td>user:update</td><td>批量启用/禁用</td></tr>
+<tr><td>DELETE</td><td><code>/user/batch</code></td><td>user:delete</td><td>批量删除</td></tr>
+<tr><td>PUT</td><td><code>/user/{id}/reset-password</code></td><td>user:update</td><td>重置密码</td></tr>
+<tr><td>PUT</td><td><code>/user/{id}/roles</code></td><td>user:assign-role</td><td>分配角色</td></tr>
+<tr><td>GET</td><td><code>/user/{id}/permissions</code></td><td>user:detail</td><td>获取用户权限和菜单</td></tr>
+</table>
+
+<h3>POST /user/ 请求体</h3>
+
+<pre class="code-block">
+{
+  &quot;username&quot;: &quot;newuser&quot;,
+  &quot;password&quot;: &quot;Pass@123&quot;,
+  &quot;real_name&quot;: &quot;新用户&quot;,
+  &quot;gender&quot;: 0,
+  &quot;email&quot;: &quot;user@example.com&quot;,
+  &quot;phone&quot;: &quot;13800000000&quot;,
+  &quot;role_ids&quot;: [11]
+}
+</pre>
+
+<h2>8.4 角色管理 — `/api/role`</h2>
+
+<table>
+<tr><th>方法</th><th>路径</th><th>权限</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>GET</td><td><code>/role/</code></td><td>role:list</td><td>角色列表/树（?tree=true 返回树形）</td></tr>
+<tr><td>POST</td><td><code>/role/</code></td><td>role:create</td><td>创建角色</td></tr>
+<tr><td>GET</td><td><code>/role/{id}</code></td><td>role:detail</td><td>角色详情（含权限树）</td></tr>
+<tr><td>PUT</td><td><code>/role/{id}</code></td><td>role:update</td><td>编辑角色</td></tr>
+<tr><td>DELETE</td><td><code>/role/{id}</code></td><td>role:delete</td><td>删除角色</td></tr>
+<tr><td>POST</td><td><code>/role/{id}/copy</code></td><td>role:create</td><td>复制角色</td></tr>
+<tr><td>GET</td><td><code>/role/{id}/users</code></td><td>role:detail</td><td>角色关联用户列表</td></tr>
+<tr><td>DELETE</td><td><code>/role/{id}/users</code></td><td>role:assign-user</td><td>移除角色关联用户</td></tr>
+</table>
+
+<h3>POST /role/ 请求体</h3>
+
+<pre class="code-block">
+{
+  &quot;role_name&quot;: &quot;内容编辑&quot;,
+  &quot;role_code&quot;: &quot;CONTENT_EDITOR&quot;,
+  &quot;description&quot;: &quot;可编辑内容模块&quot;,
+  &quot;parent_role_ids&quot;: [11],
+  &quot;permissions&quot;: [
+    {&quot;permission_id&quot;: 72, &quot;is_deny&quot;: false},
+    {&quot;permission_id&quot;: 74, &quot;is_deny&quot;: false},
+    {&quot;permission_id&quot;: 76, &quot;is_deny&quot;: true}
+  ]
+}
+</pre>
+
+<h2>8.5 权限管理 — `/api/permission`</h2>
+
+<table>
+<tr><th>方法</th><th>路径</th><th>权限</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>GET</td><td><code>/permission/tree</code></td><td>permission:list</td><td>完整权限树</td></tr>
+<tr><td>POST</td><td><code>/permission/</code></td><td>permission:create</td><td>创建权限资源</td></tr>
+<tr><td>PUT</td><td><code>/permission/{id}</code></td><td>permission:update</td><td>编辑权限资源</td></tr>
+<tr><td>DELETE</td><td><code>/permission/{id}</code></td><td>permission:delete</td><td>删除权限资源</td></tr>
+<tr><td>PUT</td><td><code>/permission/sort</code></td><td>permission:update</td><td>排序</td></tr>
+<tr><td>GET</td><td><code>/permission/export</code></td><td>permission:list</td><td>导出权限树</td></tr>
+<tr><td>POST</td><td><code>/permission/import</code></td><td>permission:create</td><td>导入权限树</td></tr>
+</table>
+
+<h3>POST /permission/ 请求体</h3>
+
+<pre class="code-block">
+{
+  &quot;name&quot;: &quot;用户列表&quot;,
+  &quot;code&quot;: &quot;user:list&quot;,
+  &quot;type&quot;: &quot;BUTTON&quot;,
+  &quot;parent_id&quot;: 71,
+  &quot;sort&quot;: 0,
+  &quot;status&quot;: 1,
+  &quot;api_paths&quot;: [&quot;GET /api/v1/user/&quot;]
+}
+</pre>
+
+<h2>8.6 审计日志 — `/api/logs`</h2>
+
+<table>
+<tr><th>方法</th><th>路径</th><th>权限</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>GET</td><td><code>/logs/</code></td><td>audit:list</td><td>多条件分页查询日志</td></tr>
+</table>
+
+<h3>查询参数</h3>
+
+<table>
+<tr><th>参数</th><th>类型</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>page</td><td>int</td><td>页码（≥1）</td></tr>
+<tr><td>size</td><td>int</td><td>每页条数（1-100）</td></tr>
+<tr><td>username</td><td>str</td><td>操作人筛选</td></tr>
+<tr><td>operation</td><td>str</td><td>操作类型（LOGIN/CREATE/UPDATE/DELETE）</td></tr>
+<tr><td>module</td><td>str</td><td>模块（AUTH/USER/ROLE/PERMISSION）</td></tr>
+<tr><td>result</td><td>str</td><td>结果（SUCCESS/FAIL）</td></tr>
+<tr><td>start_time</td><td>str</td><td>开始时间（ISO 8601）</td></tr>
+<tr><td>end_time</td><td>str</td><td>结束时间（ISO 8601）</td></tr>
+</table>
+
+<h2>8.7 错误码参考</h2>
+
+<table>
+<tr><th>HTTP 状态码</th><th>code</th><th>说明</th><th>触发场景</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>400</td><td>400</td><td>请求参数错误</td><td>Pydantic 校验失败</td></tr>
+<tr><td>401</td><td>401</td><td>未认证</td><td>缺少 Token、Token 无效/过期/已注销、用户禁用</td></tr>
+<tr><td>401</td><td>401</td><td>账号锁定</td><td>连续登录失败超过阈值</td></tr>
+<tr><td>403</td><td>403</td><td>无权限</td><td>用户缺少所需权限码</td></tr>
+<tr><td>404</td><td>404</td><td>资源不存在</td><td>用户/角色/权限不存在</td></tr>
+<tr><td>409</td><td>409</td><td>操作冲突</td><td>用户名已存在、角色编码重复、角色有关联用户不能删、不能删除自己</td></tr>
+<tr><td>422</td><td>422</td><td>参数校验失败</td><td>FastAPI 参数类型错误</td></tr>
+<tr><td>429</td><td>429</td><td>请求过于频繁</td><td>超过速率限制（每 IP 200 次/分钟）</td></tr>
+<tr><td>500</td><td>500</td><td>服务器内部错误</td><td>未捕获异常</td></tr>
+</table>
+
+<h2>8.8 系统配置项</h2>
+
+<table>
+<tr><th>配置项</th><th>默认值</th><th>环境变量</th><th>说明</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>DATABASE_URL</td><td><code>mysql+aiomysql://root:root@localhost:3306/rbac_db</code></td><td><code>DATABASE_URL</code></td><td>数据库连接</td></tr>
+<tr><td>REDIS_URL</td><td><code>redis://localhost:6380/0</code></td><td><code>REDIS_URL</code></td><td>Redis 连接（不可用时降级 DB）</td></tr>
+<tr><td>JWT_SECRET_KEY</td><td><code>rbac-dev-secret-...</code></td><td><code>JWT_SECRET_KEY</code></td><td>JWT 签名密钥（生产必须修改）</td></tr>
+<tr><td>JWT_ALGORITHM</td><td>HS256</td><td>—</td><td>JWT 签名算法</td></tr>
+<tr><td>ACCESS_TOKEN_EXPIRE_MINUTES</td><td>30</td><td>—</td><td>Access Token 有效期（分钟）</td></tr>
+<tr><td>REFRESH_TOKEN_EXPIRE_DAYS</td><td>1</td><td>—</td><td>Refresh Token 有效期（天）</td></tr>
+<tr><td>PASSWORD_MIN_LENGTH</td><td>8</td><td>—</td><td>密码最小长度</td></tr>
+<tr><td>MAX_LOGIN_ATTEMPTS</td><td>5</td><td>—</td><td>登录失败锁定阈值</td></tr>
+<tr><td>LOGIN_LOCK_MINUTES</td><td>30</td><td>—</td><td>锁定时间（分钟）</td></tr>
+<tr><td>CAPTCHA_THRESHOLD</td><td>3</td><td>—</td><td>多少次失败后要求验证码</td></tr>
+<tr><td>CORS_ORIGINS</td><td><code>http://localhost:5173</code></td><td><code>CORS_ORIGINS</code></td><td>允许的跨域来源（逗号分隔）</td></tr>
+<tr><td>RATE_LIMIT</td><td><code>200/minute</code></td><td>—</td><td>速率限制</td></tr>
+</table>
+
+<h2>8.9 项目目录结构</h2>
+
+<h3>后端 (FastAPI)</h3>
+
+<pre class="code-block">
+src/rbac/
+├── main.py                 # 应用入口，中间件注册，lifespan
+├── seed.py                 # 测试数据种子脚本
+├── api/                    # 接口层（路由 + 参数校验 + 依赖注入）
+│   ├── router.py           # 顶层路由（/api 前缀）
+│   ├── auth.py             # 认证接口
+│   ├── user.py             # 用户接口
+│   ├── role.py             # 角色接口
+│   ├── permission.py       # 权限接口
+│   └── logs.py             # 审计日志接口
+├── service/                # 业务逻辑层
+│   ├── _audit.py           # 审计日志写入（共享模块）
+│   ├── auth.py             # 登录/刷新/登出/踢人
+│   ├── user.py             # 用户 CRUD / 角色分配
+│   ├── role.py             # 角色 CRUD / 继承 / 用户关联
+│   ├── permision.py        # 权限 CRUD / 树构建 / 导入
+│   └── checker.py          # 权限计算 / 缓存 / 菜单构建
+├── crud/                   # 数据访问层
+│   ├── user.py             # UserRepository
+│   ├── role.py             # RoleRepository
+│   ├── permission.py       # PermissionRepository
+│   └── logs.py             # 审计日志读写
+├── models/                 # ORM 模型
+│   ├── user.py
+│   ├── role.py
+│   ├── permission.py
+│   ├── user_role.py
+│   ├── role_permission.py
+│   ├── token_blacklist.py
+│   ├── login_failure.py
+│   └── logs.py
+├── schemas/                # Pydantic 请求/响应模型
+│   ├── auth.py
+│   ├── user.py
+│   ├── role.py
+│   └── permission.py
+├── core/                   # 核心模块
+│   ├── config.py           # 配置管理（pydantic-settings）
+│   ├── deps.py             # FastAPI 依赖（认证、权限、分页）
+│   ├── exceptions.py       # 异常类 + 全局处理器
+│   ├── security.py         # 密码哈希、JWT、验证码
+│   └── redis_client.py     # Redis 客户端（含降级逻辑）
+└── db/
+    ├── base.py             # SQLAlchemy Base
+    └── session.py          # 异步引擎、会话工厂、get_db
+</pre>
+
+<h3>前端 (Vue 3)</h3>
+
+<pre class="code-block">
+src/
+├── main.js                 # 应用入口，Element Plus + 图标全局注册
+├── App.vue                 # 根组件（中文语言包）
+├── api/                    # API 封装
+│   ├── index.js            # Axios 实例 + 拦截器（Token 刷新、全局错误提示）
+│   ├── auth.js
+│   ├── user.js
+│   ├── role.js
+│   ├── permission.js
+│   └── logs.js
+├── stores/                 # Pinia 状态管理
+│   ├── auth.js             # 用户、Token、权限、菜单、会话恢复
+│   └── app.js              # 侧边栏、移动端抽屉
+├── router/
+│   └── index.js            # 路由配置 + 守卫（权限校验、会话恢复）
+├── views/                  # 页面组件
+│   ├── login/LoginView.vue
+│   ├── dashboard/DashboardView.vue
+│   ├── error/403.vue, 404.vue
+│   └── system/
+│       ├── users/UserList.vue, UserFormDialog.vue
+│       ├── roles/RoleList.vue, RoleFormDialog.vue
+│       ├── permissions/PermissionList.vue
+│       └── audit/Log.vue
+├── components/             # 公共组件
+│   ├── layout/AppLayout.vue, HeaderBar.vue, SidebarMenu.vue
+│   └── common/PermissionTree.vue
+├── assets/styles/global.css  # 全局样式 + 移动端适配
+└── utils/index.js          # Token 存储、日期格式化、用户信息持久化
+</pre>
+
+<h1>9 前端系统需求</h1>
+
+<h2>9.1 技术栈</h2>
+
+<table>
+<tr><th>技术</th><th>用途</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>Vue 3 (Composition API)</td><td>前端框架</td></tr>
+<tr><td>Vite</td><td>构建工具</td></tr>
+<tr><td>vue-router 4</td><td>路由管理</td></tr>
+<tr><td>Pinia</td><td>状态管理</td></tr>
+<tr><td>Element Plus</td><td>UI 组件库</td></tr>
+<tr><td>Axios</td><td>HTTP 客户端</td></tr>
+<tr><td>@element-plus/icons-vue</td><td>图标库</td></tr>
+</table>
+
+<h2>9.2 页面需求</h2>
+
+<h3>9.2.1 登录页面</h3>
+
+<p>- 输入用户名和密码</p>
+<p>- 失败 3 次后显示图形验证码</p>
+<p>- 登录成功后跳转仪表盘</p>
+<p>- 已登录状态访问登录页自动跳转仪表盘</p>
+
+<h3>9.2.2 仪表盘</h3>
+
+<p>- 欢迎信息（欢迎回来，用户名）</p>
+<p>- 统计卡片：用户总数、角色总数、权限资源数、审计日志数</p>
+<p>- 快速导航：用户管理、角色管理、权限管理、审计日志（根据权限显示）</p>
+
+<h3>9.2.3 用户管理页面</h3>
+
+<p>- 搜索栏：关键字搜索 + 状态下拉筛选</p>
+<p>- 工具栏：新增用户、批量启用、批量禁用、批量删除</p>
+<p>- 数据表格：ID / 用户名 / 真实姓名 / 邮箱 / 手机号 / 状态 / 最后登录 / 创建时间 / 操作</p>
+<p>- 操作按钮：编辑、角色、重置密码、删除（根据权限显示）</p>
+<p>- 弹窗：新增/编辑用户表单、分配角色（checkbox-group）、重置密码</p>
+
+<h3>9.2.4 角色管理页面</h3>
+
+<p>- 列表/树形视图切换</p>
+<p>- 搜索、新增、复制、删除角色</p>
+<p>- 查看角色关联用户</p>
+<p>- 角色表单：名称、编码、描述、权限分配（PermissionTree 组件）</p>
+
+<h3>9.2.5 权限资源管理页面</h3>
+
+<p>- 树形表格展示（可展开/收起）</p>
+<p>- 新增根资源、添加子资源</p>
+<p>- 编辑、删除资源</p>
+<p>- 拖拽排序（提交全量排序）</p>
+<p>- 导出/导入权限树</p>
+
+<h3>9.2.6 审计日志页面</h3>
+
+<p>- 多条件搜索：用户名、操作类型、模块、结果、时间范围</p>
+<p>- 数据表格：ID / 用户名 / 操作类型 / 模块 / 描述 / IP / 结果 / 时间</p>
+<p>- 日志详情弹窗（含请求参数）</p>
+<p>- 导出日志</p>
+
+<h3>9.2.7 错误页面</h3>
+
+<p>- 403 无权限页面</p>
+<p>- 404 页面不存在</p>
+
+<h2>9.3 移动端适配</h2>
+
+<p>- 响应式布局：桌面端（≥768px）侧边栏常驻，移动端（\<768px）侧边栏改为抽屉式</p>
+<p>- 表格横向滚动</p>
+<p>- 搜索栏纵向堆叠</p>
+<p>- 对话框全屏适配</p>
+<p>- 分页简化（小屏隐藏跳转和每页条数选择器）</p>
+
+<h1>10 非功能需求</h1>
+
+<h2>10.1 安全性需求</h2>
+
+<p>1. <strong>密码安全</strong></p>
+
+<p>    - BCrypt 哈希存储，不存储明文</p>
+<p>    - 密码强度校验：≥8 位，字母/数字/特殊字符至少两类</p>
+
+<p>2. <strong>认证安全</strong></p>
+
+<p>    - JWT 双 Token 机制（access 30min + refresh 1day）</p>
+<p>    - Token 黑名单（登出后立即失效）</p>
+<p>    - 登录失败锁定（5 次 / 30 分钟，持久化到 Redis/DB）</p>
+
+<p>3. <strong>防攻击</strong></p>
+
+<p>    - 防暴力破解：登录锁定 + 验证码</p>
+<p>    - 防用户名枚举：不存在用户与密码错误统一响应</p>
+<p>    - API 速率限制：每 IP 每分钟 200 次</p>
+<p>    - CORS 白名单</p>
+
+<p>4. <strong>输入校验</strong></p>
+
+<p>    - 服务端 Pydantic 模型校验所有输入</p>
+<p>    - 用户名 4-20 字符、密码 ≥8 位</p>
+<p>    - 分页参数 page≥1、size 1-100</p>
+
+<p>5. <strong>审计追溯</strong></p>
+
+<p>    - 所有增删改操作记录审计日志</p>
+<p>    - 记录操作人、时间、IP、参数（脱敏）</p>
+
+<h2>10.2 性能需求</h2>
+
+<p>1. <strong>缓存策略</strong></p>
+
+<p>    - 用户权限内存缓存（避免每次请求查库）</p>
+<p>    - Redis 缓存 Token 黑名单和登录失败计数（TTL 自动过期）</p>
+
+<p>2. <strong>数据库</strong></p>
+
+<p>    - 异步驱动（aiomysql）</p>
+<p>    - 连接池（pool_size=20, max_overflow=10）</p>
+<p>    - 关键查询字段建立索引（username, status, deleted_at）</p>
+
+<p>3. <strong>批量操作</strong></p>
+
+<p>    - 批量 INSERT（单条 SQL 多值）</p>
+<p>    - 分页查询避免全表扫描</p>
+
+<h2>10.3 可维护性需求</h2>
+
+<p>1. <strong>模块分层</strong></p>
+
+<p>    - API 层（路由 + 参数校验 + 依赖注入）</p>
+<p>    - Service 层（业务逻辑 + 权限校验 + 审计）</p>
+<p>    - CRUD 层（数据访问）</p>
+<p>    - Model 层（ORM 模型）</p>
+
+<p>2. <strong>配置管理</strong></p>
+
+<p>    - pydantic-settings 集中管理配置</p>
+<p>    - 环境变量 > .env 文件 > 默认值三级优先级</p>
+<p>    - 开发/生产环境通过环境变量切换</p>
+
+<p>3. <strong>错误处理</strong></p>
+
+<p>    - 统一异常类（AppError / ConflictError / NotFoundError / ForbiddenError / UnauthorizedError）</p>
+<p>    - 全局异常处理器（业务异常 + 兜底 500）</p>
+<p>    - 500 错误记录日志（exc_info=True）</p>
+
+<h2>10.4 可靠性需求</h2>
+
+<p>1. <strong>Redis 降级</strong></p>
+
+<p>    - Redis 不可用时自动降级到 MySQL</p>
+<p>    - Token 黑名单和登录失败计数均支持 DB 兜底</p>
+<p>    - Redis 恢复后自动切换回 Redis</p>
+
+<p>2. <strong>事务保护</strong></p>
+
+<p>    - session 级别事务管理（显式 commit/rollback）</p>
+<p>    - 批量操作原子性（先删后插在同一事务内）</p>
+
+<p>3. <strong>软删除</strong></p>
+
+<p>    - 用户使用软删除（标记 deleted_at，数据可恢复）</p>
+<p>    - 角色和权限使用硬删除</p>
+
+<h1>11 系统开发范围说明</h1>
+
+<h2>11.1 后端部分</h2>
+
+<table>
+<tr><th>模块</th><th>开发内容</th><th>状态</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>用户认证</td><td>登录、登出、Token 刷新、验证码、强制下线</td><td>✅</td></tr>
+<tr><td>用户管理</td><td>CRUD、批量启禁用、批量删除、重置密码、分配角色、权限查询</td><td>✅</td></tr>
+<tr><td>角色管理</td><td>CRUD、角色树、复制、用户关联查询、移除用户、循环依赖检测</td><td>✅</td></tr>
+<tr><td>权限管理</td><td>CRUD、权限树、排序、导入导出、deny 优先、角色继承</td><td>✅</td></tr>
+<tr><td>审计日志</td><td>自动记录、多条件查询、导出</td><td>✅</td></tr>
+<tr><td>安全防护</td><td>BCrypt 密码、JWT 双 Token、黑名单、登录锁定、速率限制</td><td>✅</td></tr>
+<tr><td>Redis 集成</td><td>Token 黑名单 TTL、登录失败 TTL、降级到 DB</td><td>✅</td></tr>
+<tr><td>菜单构建</td><td>用户菜单树、权限过滤、空节点清理</td><td>✅</td></tr>
+</table>
+
+<h2>11.2 前端部分</h2>
+
+<table>
+<tr><th>页面/组件</th><th>开发内容</th><th>状态</th></tr>
+<tr class="fake-sep"></tr>
+<tr><td>登录页面</td><td>用户登录、验证码</td><td>✅</td></tr>
+<tr><td>仪表盘</td><td>统计卡片、快速导航</td><td>✅</td></tr>
+<tr><td>用户管理</td><td>列表、搜索、CRUD、批量操作、角色分配、重置密码</td><td>✅</td></tr>
+<tr><td>角色管理</td><td>列表/树形视图、CRUD、复制、权限分配、用户关联</td><td>✅</td></tr>
+<tr><td>权限管理</td><td>树形表格、CRUD、排序、导入导出</td><td>✅</td></tr>
+<tr><td>审计日志</td><td>多条件搜索、列表、详情、导出</td><td>✅</td></tr>
+<tr><td>布局组件</td><td>侧边栏、顶栏、移动端抽屉</td><td>✅</td></tr>
+<tr><td>错误页面</td><td>403、404</td><td>✅</td></tr>
+<tr><td>移动端适配</td><td>响应式布局、抽屉式菜单</td><td>✅</td></tr>
+<tr><td>权限树组件</td><td>勾选 + 允许/拒绝单选框</td><td>✅</td></tr>
+<tr><td>路由守卫</td><td>权限校验、登录状态恢复</td><td>✅</td></tr>
+<tr><td>全局错误处理</td><td>Axios 拦截器统一提示</td><td>✅</td></tr>
+</table>
+
+
+</div>
+</body>
+</html>
