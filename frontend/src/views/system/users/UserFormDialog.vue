@@ -82,7 +82,7 @@ watch(
             form.email = u.email || ''
             form.phone = u.phone || ''
             form.gender = u.gender ?? 0
-            form.status = u.status
+            form.status = u.status ? 1 : 0
             form.password = '' // 编辑时不回显密码
             form.role_ids = u.roles?.map((r) => r.id) || []
           }

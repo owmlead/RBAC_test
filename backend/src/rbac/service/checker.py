@@ -39,7 +39,10 @@ async def _get_ancestor_role_ids(db: AsyncSession, role_ids: list[int]) -> set[i
             continue
         visited.add(rid)
         role = await role_crud.get_role_by_id(rid)
-        if role and role.parent_role_ids:
+        # 禁用角色不参与权限解析，跳过其祖先链展开
+        if not role or not role.status:
+            continue
+        if role.parent_role_ids:
             for pid in role.parent_role_ids:
                 if pid not in visited:
                     all_ids.add(pid)

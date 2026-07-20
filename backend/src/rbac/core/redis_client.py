@@ -12,7 +12,7 @@ Redis 客户端模块。
 - Token 黑名单管理（注销机制）
 """
 import os
-os.environ.setdefault("REDIS_RESP3_DISABLE", "1")  # Redis 5.x 不支持 RESP3/HELLO
+os.environ.setdefault("REDIS_RESP3_DISABLE", "1")
 import redis.asyncio as aioredis
 from src.rbac.core.config import setting
 
@@ -34,8 +34,8 @@ async def init_redis() -> None:
     global _pool, _available
     try:
         # 创建异步连接池，最大连接数 10
-        _pool = aioredis.ConnectionPool.from_url(setting.REDIS_URL, max_connections=10)
-        # 发送 PING 命令测试连接是否可用（protocol="RESP2" 兼容 Redis 5.x）
+        _pool = aioredis.ConnectionPool.from_url(setting.REDIS_URL, max_connections=10, protocol=2)
+        # 发送 PING 命令测试连接是否可用
         r = aioredis.Redis(connection_pool=_pool)
         await r.ping()
         _available = True  # 连接成功，标记可用

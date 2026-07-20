@@ -109,9 +109,9 @@ class UserRepository:
         :param update_data: 需要更新的字段字典，None值会被跳过
         :return: 更新后的用户ORM模型
         """
-        for kay, val in update_data.items():
+        for key, val in update_data.items():
             if val is not None:  # None 字段跳过，实现部分更新
-                setattr(user, kay, val)
+                setattr(user, key, val)
         await self.db.flush()
         return user
 

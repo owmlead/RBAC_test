@@ -49,6 +49,7 @@ class RoleUpdateRequest(BaseModel):
     description: str | None = Field(None, max_length=255, description="新的角色描述")
     parent_role_ids: list[int] | None = Field(None, description="新的父角色ID列表（None=不修改，空列表=清空继承）")
     permissions: list[PermissionAssignment] | None = Field(None, description="新的权限列表（None=不修改，空列表=清空权限）")
+    status: bool | None = Field(None, description="状态 True-启用 False-禁用")
 
 
 class RoleCopyRequest(BaseModel):

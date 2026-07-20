@@ -33,15 +33,12 @@ class RoleRepository:
 
     async def get_role_by_id(self, role_id: int) -> Role | None:
         """
-        通过角色ID查询启用的角色
+        通过角色ID查询角色（含禁用角色，调用方按需过滤）
         :param role_id: 角色ID
         :return: 角色ORM模型，未找到返回None
         """
         result = await self.db.execute(
-            select(Role).where(
-                Role.id == role_id,
-                Role.status == True,  # 仅查启用角色
-            )
+            select(Role).where(Role.id == role_id)
         )
         return result.scalar_one_or_none()
 

@@ -46,7 +46,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True, comment="主键ID")
     # 登录凭证，与 deleted_at 组成联合唯一键
     username: Mapped[str] = mapped_column(String(50), nullable=False, comment="用户名（登录凭证）")
-    # Bcrypt 加密后的密码哈希，验证时用 passlib 比对
+    # Bcrypt 加密后的密码哈希，验证时用 bcrypt 比对
     password: Mapped[str] = mapped_column(String(255), nullable=False, comment="Bcrypt 加密密码")
     # 界面展示名称，如"张三"
     real_name: Mapped[str] = mapped_column(String(50), nullable=False, comment="真实姓名（界面显示）")

@@ -33,6 +33,7 @@ const form = reactive({
   role_code: '',
   description: '',
   parent_role_ids: [],
+  status: 1,
 })
 
 const rules = {
@@ -76,6 +77,7 @@ watch(
             form.role_code = role.role_code
             form.description = role.description || ''
             form.parent_role_ids = role.parent_role_ids || []
+            form.status = role.status ? 1 : 0
 
             // 将角色现有的权限数据构建为 Map 供 PermissionTree 使用
             const map = new Map()
@@ -97,6 +99,7 @@ watch(
         form.role_code = ''
         form.description = ''
         form.parent_role_ids = []
+        form.status = 1
         checkedPermissions.value = new Map()
       }
     }
@@ -134,6 +137,7 @@ async function handleSubmit() {
         description: form.description,
         parent_role_ids: form.parent_role_ids.length > 0 ? form.parent_role_ids : undefined,
         permissions,
+        status: !!form.status,
       })
       if (res.code === 0) {
         ElMessage.success('角色更新成功')
@@ -217,6 +221,15 @@ function handleClose() {
             :value="r.id"
           />
         </el-select>
+      </el-form-item>
+      <el-form-item label="状态">
+        <el-switch
+          v-model="form.status"
+          :active-value="1"
+          :inactive-value="0"
+          active-text="启用"
+          inactive-text="禁用"
+        />
       </el-form-item>
       <el-form-item label="权限分配">
         <div v-if="permTreeData.length" class="perm-tree-scroll">

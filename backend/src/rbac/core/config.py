@@ -61,7 +61,7 @@ class Setting(BaseSettings):
 
     # ── Redis ──
     # Redis 连接地址，用于缓存、黑名单、登录失败计数等
-    REDIS_URL: str = "redis://localhost:6380/0"
+    REDIS_URL: str = "redis://localhost:6379/0"
 
     # ── 速率限制 ──
     # 格式为 "次数/时间单位"，如 "200/minute"

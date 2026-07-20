@@ -14,17 +14,13 @@ import re
 from base64 import b64encode
 from datetime import timedelta, datetime, timezone
 from typing import Any
-from passlib.context import CryptContext
-from sqlalchemy import select, update
 import uuid
+import bcrypt
 from jose import JWTError, jwt
 
 from src.rbac.core.config import setting
 
 # ── 密码哈希 ──
-
-# BCrypt 上下文，schemes=["bcrypt"] 指定使用 bcrypt 算法，deprecated="auto" 自动升级旧算法
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
@@ -37,7 +33,10 @@ def hash_password(password: str) -> str:
     :param password: 明文密码
     :return: bcrypt 哈希后的密码字符串
     """
-    return _pwd_context.hash(password)
+    # bcrypt 要求密码为 bytes，且长度不能超过 72 字节
+    password_bytes = password.encode("utf-8")[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password_bytes, salt).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
@@ -50,7 +49,9 @@ def verify_password(plain: str, hashed: str) -> bool:
     :param hashed: 数据库中存储的 bcrypt 哈希密码
     :return: True 正确 / False 错误
     """
-    return _pwd_context.verify(plain, hashed)
+    plain_bytes = plain.encode("utf-8")[:72]
+    hashed_bytes = hashed.encode("utf-8")
+    return bcrypt.checkpw(plain_bytes, hashed_bytes)
 
 
 # ── 图形验证码 ──

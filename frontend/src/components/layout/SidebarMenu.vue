@@ -111,13 +111,7 @@ function handleSelect(index) {
     active-text-color="#409eff"
     @select="handleSelect"
   >
-    <!-- 仪表盘菜单项对所有用户可见 -->
-    <el-menu-item index="/dashboard">
-      <el-icon><HomeFilled/></el-icon>
-      <template #title>仪表盘</template>
-    </el-menu-item>
-
-    <!-- 根据权限动态渲染菜单 -->
+    <!-- 根据权限动态渲染菜单（仪表盘已包含在权限树中） -->
     <template v-for="menu in menuConfigs" :key="menu.index">
       <!-- 有子菜单 → 使用 el-sub-menu 展示二级菜单 -->
       <el-sub-menu v-if="menu.children && menu.children.length > 0" :index="menu.index">
